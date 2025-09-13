@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Digital UTI - Registro de Pacientes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode {
+            background: linear-gradient(135deg, #1e3c72 0%, #2c5aa0 100%);
+            color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+        
+        body.dark-mode .container {
+            background: #2c3e50;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2c5aa0, #1e3c72);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .date-section {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            transition: background 0.3s;
+        }
+        
+        body.dark-mode .date-section {
+            background: #34495e;
+            border-bottom: 1px solid #2c3e50;
+        }
+        
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        
+        body.dark-mode .date-input {
+            border-color: #2c3e50;
+            background: #34495e;
+            color: #f8f9fa;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: #2c5aa0;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .patient-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            display: none;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        
+        body.dark-mode .patient-card {
+            background: #34495e;
+            border-color: #2c3e50;
+        }
+        
+        .patient-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+            transition: border-color 0.3s;
+        }
+        
+        body.dark-mode .patient-header {
+            border-bottom: 1px solid #2c3e50;
+        }
+        
+        .patient-title {
+            font-weight: 600;
+            color: #2c5aa0;
+            font-size: 16px;
+        }
+        
+        body.dark-mode .patient-title {
+            color: #a1b4d4;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #495057;
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+        
+        body.dark-mode label {
+            color: #dee2e6;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s, background 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode input,
+        body.dark-mode textarea,
+        body.dark-mode select {
+            border-color: #2c3e50;
+            background: #34495e;
+            color: #f8f9fa;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2c5aa0;
+        }
+        
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .time-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .time-table th,
+        .time-table td {
+            border: 1px solid #dee2e6;
+            padding: 4px;
+            text-align: center;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        
+        body.dark-mode .time-table th,
+        body.dark-mode .time-table td {
+            border-color: #2c3e50;
+        }
+        
+        .time-table th {
+            background: #e9ecef;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        body.dark-mode .time-table th {
+            background: #2c3e50;
+        }
+        
+        .time-table input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            padding: 2px;
+            font-size: 11px;
+            color: inherit;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #2c5aa0, #1e3c72);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-reset {
+            background: #6c757d;
+        }
+        
+        .btn-reset:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        .report-section {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+            transition: background 0.3s;
+        }
+        
+        body.dark-mode .report-section {
+            background: #2c3e50;
+        }
+        
+        .report-content {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        
+        body.dark-mode .report-content {
+            background: #34495e;
+            border-color: #2c3e50;
+            color: #f8f9fa;
+        }
+        
+        .copy-btn {
+            background: #17a2b8;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+        }
+
+        .footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+        
+        body.dark-mode .footer {
+            color: #dee2e6;
+        }
+
+        .tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 8px 12px;
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode .tab-btn {
+            background: #2c3e50;
+            border-color: #34495e;
+            color: #f8f9fa;
+        }
+
+        .tab-btn:hover {
+            background: #dee2e6;
+        }
+        
+        body.dark-mode .tab-btn:hover {
+            background: #34495e;
+        }
+
+        .tab-btn.active {
+            background: #2c5aa0;
+            color: white;
+            border-color: #2c5aa0;
+        }
+        
+        #calculadoras {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        
+        body.dark-mode #calculadoras {
+            background: #34495e;
+            border-color: #2c3e50;
+        }
+        
+        #calculadoras h2 {
+            color: #2c5aa0;
+            margin-bottom: 20px;
+            transition: color 0.3s;
+        }
+        
+        body.dark-mode #calculadoras h2 {
+            color: #a1b4d4;
+        }
+        
+        #calculadoras details {
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        
+        body.dark-mode #calculadoras details {
+            border-color: #2c3e50;
+        }
+        
+        #calculadoras summary {
+            padding: 10px;
+            font-weight: 600;
+            color: #2c5aa0;
+            cursor: pointer;
+            transition: color 0.3s, background 0.3s;
+        }
+        
+        body.dark-mode #calculadoras summary {
+            color: #a1b4d4;
+            background: #34495e;
+        }
+        
+        #calculadoras summary:hover {
+            background: #e9ecef;
+        }
+        
+        body.dark-mode #calculadoras summary:hover {
+            background: #2c3e50;
+        }
+        
+        #calculadoras .calc-content {
+            padding: 15px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            transition: background 0.3s;
+        }
+        
+        body.dark-mode #calculadoras .calc-content {
+            background: #34495e;
+        }
+        
+        #calculadoras .calc-content p {
+            font-weight: bold;
+            color: #495057;
+            margin-top: 10px;
+            transition: color 0.3s;
+        }
+        
+        body.dark-mode #calculadoras .calc-content p {
+            color: #dee2e6;
+        }
+        
+        #calculadoras .calc-content .form-group {
+            margin-bottom: 10px;
+        }
+        
+        #darkModeToggle {
+            margin: 10px 0;
+            width: auto;
+            padding: 8px 16px;
+            background: #6c757d;
+        }
+        
+        #resetAll {
+            background: #dc3545;
+            margin-top: 10px;
+        }
+        
+        #resetAll:hover {
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        }
+        
+        .dva-container {
+            margin-top: 10px;
+        }
+        
+        .dva-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .add-dva-btn {
+            background: #17a2b8;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .add-dva-btn:hover {
+            background: #138496;
+        }
+        
+        .remove-dva-btn {
+            background: #dc3545;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .remove-dva-btn:hover {
+            background: #c82333;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .form-row, .dva-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .vitals-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Sistema Digital UTI - beira-leito</h1>
+        </div>
+        
+        <div class="date-section">
+            <label for="reportDate">Data do Plantão:</label>
+            <input type="date" id="reportDate" class="date-input">
+        </div>
+        
+        <div class="content">
+            <button class="btn" onclick="addPatient()">➕ Adicionar Paciente</button>
+
+            <div id="tabBar" class="tab-bar"></div>
+            
+            <div id="patientsContainer"></div>
+            <div id="calculadoras"></div>
+            
+            <button class="btn btn-success" onclick="generateReport()">📋 Gerar Relatório Final</button>
+            
+            <div id="reportSection" class="report-section">
+                <h3>📄 Relatório do Plantão</h3>
+                <div id="reportContent" class="report-content"></div>
+                <button class="btn copy-btn" onclick="copyReport()">📋 Copiar Relatório</button>
+            </div>
+            
+            <button id="darkModeToggle" class="btn" onclick="toggleDarkMode()">🌙 Modo Escuro</button>
+            <button id="resetAll" class="btn" onclick="resetAllData()">🗑️ Resetar Tudo</button>
+        </div>
+
+        <div class="footer">
+            <p>Criado por Henrique Ceron</p>
+        </div>
+    </div>
+
+    <script>
+        let patientCounter = 0;
+        let currentTab = 'pacientes';
+        let currentPatientId = null;
+        let dvaCounters = {};
+
+        // Define a data atual como padrão
+        document.getElementById('reportDate').valueAsDate = new Date();
+        
+        // Carregar dados do localStorage
+        window.addEventListener('load', () => {
+            loadData();
+            setupCalculadoras();
+            updateTabs();
+        });
+        
+        function addPatient() {
+            patientCounter++;
+            dvaCounters[patientCounter] = 0;
+            const patientHtml = `
+                <div class="patient-card" data-patient-id="${patientCounter}">
+                    <div class="patient-header">
+                        <span class="patient-title">Paciente ${patientCounter}</span>
+                        <button class="delete-btn" onclick="deletePatient(${patientCounter})">🗑️ Excluir</button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Leito:</label>
+                            <input type="text" id="leito_${patientCounter}" placeholder="Ex: 01" oninput="updateTabs(); saveData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome:</label>
+                            <input type="text" id="nome_${patientCounter}" placeholder="Nome do paciente" oninput="saveData();">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sinais Vitais:</label>
+                        <div class="vitals-grid">
+                            <input type="text" id="pa_${patientCounter}" placeholder="P.A." oninput="validateInput(this, 'text'); saveData();">
+                            <input type="text" id="fc_${patientCounter}" placeholder="FC" oninput="validateInput(this, 'decimal'); saveData();">
+                            <input type="text" id="fr_${patientCounter}" placeholder="FR" oninput="validateInput(this, 'decimal'); saveData();">
+                            <input type="text" id="pam_${patientCounter}" placeholder="PAM" oninput="validateInput(this, 'decimal'); saveData();">
+                            <input type="text" id="tax_${patientCounter}" placeholder="T. Axilar" oninput="validateInput(this, 'decimal'); saveData();">
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <input type="text" id="spo2_${patientCounter}" placeholder="SpO₂" oninput="validateInput(this, 'decimal'); saveData();">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Controles por Horário:</label>
+                        <div class="checkbox-item" style="margin-bottom: 10px;">
+                            <input type="checkbox" id="enable_pa_${patientCounter}" onclick="togglePaControls(${patientCounter}); saveData();">
+                            <label for="enable_pa_${patientCounter}">Ativar controle de PA por horário</label>
+                        </div>
+                        <table class="time-table">
+                            <tr>
+                                <th>Parâm.</th>
+                                <th>20h</th>
+                                <th>22h</th>
+                                <th>00h</th>
+                                <th>02h</th>
+                                <th>04h</th>
+                                <th>06h</th>
+                            </tr>
+                            <tr id="pa_row_${patientCounter}" style="display: none;">
+                                <td><strong>PA</strong></td>
+                                <td><input type="text" id="pa_20_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                                <td><input type="text" id="pa_22_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                                <td><input type="text" id="pa_00_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                                <td><input type="text" id="pa_02_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                                <td><input type="text" id="pa_04_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                                <td><input type="text" id="pa_06_${patientCounter}" oninput="validateInput(this, 'text'); saveData();"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>HGT</strong></td>
+                                <td><input type="text" id="hgt_20_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                                <td><input type="text" id="hgt_22_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                                <td><input type="text" id="hgt_00_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                                <td><input type="text" id="hgt_02_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                                <td><input type="text" id="hgt_04_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                                <td><input type="text" id="hgt_06_${patientCounter}" oninput="validateInput(this, 'decimal'); calculateDeltaHGT(${patientCounter}); saveData();"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>TA</strong></td>
+                                <td><input type="text" id="ta_20_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                                <td><input type="text" id="ta_22_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                                <td><input type="text" id="ta_00_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                                <td><input type="text" id="ta_02_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                                <td><input type="text" id="ta_04_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                                <td><input type="text" id="ta_06_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();"></td>
+                            </tr>
+                        </table>
+                        <div style="text-align: center; margin-top: 5px;">
+                            <input type="text" id="delta_hgt_${patientCounter}" placeholder="Delta-HGT será calculado automaticamente" readonly style="background-color: #e9ecef; font-weight: bold; color: #495057;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fluidos (ml):</label>
+                            <input type="text" id="fluidos_${patientCounter}" placeholder="Ex: 200+500+700" oninput="calculateBalance(${patientCounter}); saveData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Outros fluidos administrados (ml):</label>
+                            <input type="text" id="outros_${patientCounter}" placeholder="Ex: 50+100 (gotejos, etc.)" oninput="calculateBalance(${patientCounter}); saveData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Diurese (ml):</label>
+                            <input type="text" id="diurese_${patientCounter}" placeholder="Ex: 100+200+300" oninput="calculateBalance(${patientCounter}); saveData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Diurese em bolsa (ml):</label>
+                            <input type="text" id="diurese_bolsa_${patientCounter}" placeholder="Ex: 150+250 (não contabiliza no balanço)" oninput="saveData();">
+                        </div>
+                        <div class="form-group">
+                            <label>Total (ml):</label>
+                            <input type="text" id="total_${patientCounter}" readonly style="background-color: #e9ecef; font-weight: bold; color: #495057;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Evacuações:</label>
+                        <input type="text" id="evacuacoes_${patientCounter}" placeholder="Descrição das evacuações" oninput="saveData();">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Antibioticoterapia:</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="antibiotico_${patientCounter}" placeholder="Nome do antibiótico" oninput="saveData();">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="antibiotico_dia_${patientCounter}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Dispositivos em Uso:</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="cvc_${patientCounter}" onclick="saveData();">
+                                <label for="cvc_${patientCounter}">CVC</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="avp_${patientCounter}" onclick="saveData();">
+                                <label for="avp_${patientCounter}">AVP</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="svd_${patientCounter}" onclick="saveData();">
+                                <label for="svd_${patientCounter}">SVD</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tot_${patientCounter}" onclick="saveData();">
+                                <label for="tot_${patientCounter}">TOT/Traq</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sng_${patientCounter}" onclick="saveData();">
+                                <label for="sng_${patientCounter}">SNG/SNE</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="linha_arterial_${patientCounter}" onclick="saveData();">
+                                <label for="linha_arterial_${patientCounter}">Linha Arterial (PAM)</label>
+                            </div>
+                        </div>
+                        <div class="dva-container" id="dva_container_${patientCounter}">
+                            <div class="dva-row" data-dva-id="0">
+                                <input type="text" id="dva_nome_0_${patientCounter}" placeholder="Droga vasoativa" oninput="saveData();">
+                                <input type="text" id="dva_dose_0_${patientCounter}" placeholder="Dose (ex: mcg/kg/min)" oninput="saveData();">
+                                <button class="btn remove-dva-btn" style="display: none;" onclick="removeDva(${patientCounter}, 0)">🗑️</button>
+                            </div>
+                        </div>
+                        <button class="btn add-dva-btn" onclick="addDva(${patientCounter})">➕ Adicionar Droga Vasoativa</button>
+                        <div style="margin-top: 10px;">
+                            <input type="text" id="drenos_${patientCounter}" placeholder="Drenos (especificar)" oninput="saveData();">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Observações:</label>
+                        <textarea id="observacoes_${patientCounter}" rows="3" placeholder="Observações importantes do plantão..." oninput="saveData();"></textarea>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('patientsContainer').insertAdjacentHTML('beforeend', patientHtml);
+            showTab('pacientes', patientCounter);
+            updatePatientDisplays();
+            saveData();
+        }
+        
+        function addDva(patientId) {
+            dvaCounters[patientId] = (dvaCounters[patientId] || 0) + 1;
+            const dvaIndex = dvaCounters[patientId];
+            const dvaHtml = `
+                <div class="dva-row" data-dva-id="${dvaIndex}">
+                    <input type="text" id="dva_nome_${dvaIndex}_${patientId}" placeholder="Droga vasoativa" oninput="saveData();">
+                    <input type="text" id="dva_dose_${dvaIndex}_${patientId}" placeholder="Dose (ex: mcg/kg/min)" oninput="saveData();">
+                    <button class="btn remove-dva-btn" onclick="removeDva(${patientId}, ${dvaIndex})">🗑️</button>
+                </div>
+            `;
+            const container = document.getElementById(`dva_container_${patientId}`);
+            if (container) {
+                container.insertAdjacentHTML('beforeend', dvaHtml);
+                saveData();
+            }
+        }
+        
+        function removeDva(patientId, dvaIndex) {
+            const row = document.querySelector(`#dva_container_${patientId} [data-dva-id="${dvaIndex}"]`);
+            if (row) {
+                row.remove();
+                saveData();
+            }
+        }
+        
+        function deletePatient(patientId) {
+            const patientCard = document.querySelector(`[data-patient-id="${patientId}"]`);
+            if (patientCard) {
+                patientCard.remove();
+                delete dvaCounters[patientId];
+            }
+            if (currentTab === 'pacientes' && currentPatientId === patientId) {
+                const remainingCards = document.querySelectorAll('.patient-card');
+                if (remainingCards.length > 0) {
+                    showTab('pacientes', parseInt(remainingCards[0].dataset.patientId));
+                } else {
+                    showTab('pacientes');
+                }
+            }
+            updatePatientDisplays();
+            saveData();
+        }
+        
+        function updatePatientDisplays() {
+            const cards = document.querySelectorAll('.patient-card');
+            cards.forEach((card, index) => {
+                const title = card.querySelector('.patient-title');
+                if (title) {
+                    title.textContent = `Paciente ${index + 1}`;
+                }
+            });
+            updateTabs();
+        }
+
+        function updateTabs() {
+            const tabBar = document.getElementById('tabBar');
+            tabBar.innerHTML = '';
+            
+            // Aba de Calculadoras
+            const calcBtn = document.createElement('button');
+            calcBtn.className = 'tab-btn';
+            calcBtn.textContent = '🧮 Calculadoras';
+            calcBtn.onclick = () => showTab('calculadoras');
+            if (currentTab === 'calculadoras') {
+                calcBtn.classList.add('active');
+            }
+            tabBar.appendChild(calcBtn);
+            
+            // Abas de Pacientes
+            const cards = document.querySelectorAll('.patient-card');
+            cards.forEach((card, index) => {
+                const id = parseInt(card.dataset.patientId);
+                const leito = getValue(`leito_${id}`);
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn';
+                btn.textContent = `P${index + 1}${leito ? ' - L' + leito : ''}`;
+                btn.onclick = () => showTab('pacientes', id);
+                if (currentTab === 'pacientes' && id === currentPatientId) {
+                    btn.classList.add('active');
+                }
+                tabBar.appendChild(btn);
+            });
+        }
+
+        function showTab(tab, patientId = null) {
+            document.querySelectorAll('.patient-card').forEach(card => card.style.display = 'none');
+            document.getElementById('calculadoras').style.display = 'none';
+            
+            if (tab === 'pacientes') {
+                currentTab = 'pacientes';
+                if (patientId) {
+                    const patientCard = document.querySelector(`[data-patient-id="${patientId}"]`);
+                    if (patientCard) {
+                        patientCard.style.display = 'block';
+                    }
+                    currentPatientId = patientId;
+                } else if (document.querySelectorAll('.patient-card').length > 0) {
+                    showTab('pacientes', parseInt(document.querySelector('.patient-card').dataset.patientId));
+                    return;
+                }
+            } else if (tab === 'calculadoras') {
+                currentTab = 'calculadoras';
+                document.getElementById('calculadoras').style.display = 'block';
+            }
+            updateTabs();
+        }
+        
+        function getValue(id) {
+            const element = document.getElementById(id);
+            if (!element) return '';
+            
+            if (element.type === 'checkbox') {
+                return element.checked;
+            }
+            return element.value || '';
+        }
+
+        function sumExpression(str) {
+            if (!str) return 0;
+            return str.split('+').reduce((acc, val) => acc + (parseFloat(val.trim().replace(',', '.')) || 0), 0);
+        }
+        
+        function calculateBalance(patientId) {
+            const fluidos = sumExpression(getValue(`fluidos_${patientId}`));
+            const outros = sumExpression(getValue(`outros_${patientId}`));
+            const diurese = sumExpression(getValue(`diurese_${patientId}`));
+            
+            const total = fluidos + outros - diurese;
+            
+            const totalField = document.getElementById(`total_${patientId}`);
+            if (totalField) {
+                totalField.value = total.toFixed(2);
+                
+                if (total > 0) {
+                    totalField.style.color = '#28a745';
+                } else if (total < 0) {
+                    totalField.style.color = '#dc3545';
+                } else {
+                    totalField.style.color = '#6c757d';
+                }
+            }
+        }
+        
+        function calculateDeltaHGT(patientId) {
+            const horarios = ['20', '22', '00', '02', '04', '06'];
+            const valores = [];
+            
+            horarios.forEach(h => {
+                const valor = parseFloat(getValue(`hgt_${h}_${patientId}`).replace(',', '.'));
+                if (!isNaN(valor) && valor > 0) {
+                    valores.push(valor);
+                }
+            });
+            
+            const deltaField = document.getElementById(`delta_hgt_${patientId}`);
+            
+            if (valores.length >= 2) {
+                const maior = Math.max(...valores);
+                const menor = Math.min(...valores);
+                deltaField.value = `(${menor.toFixed(2)} - ${maior.toFixed(2)})`;
+                
+                const diferenca = maior - menor;
+                if (diferenca > 50) {
+                    deltaField.style.color = '#dc3545';
+                } else if (diferenca > 30) {
+                    deltaField.style.color = '#ffc107';
+                } else {
+                    deltaField.style.color = '#28a745';
+                }
+            } else if (valores.length === 1) {
+                deltaField.value = `(${valores[0].toFixed(2)} - aguardando mais valores)`;
+                deltaField.style.color = '#6c757d';
+            } else {
+                deltaField.value = '';
+                deltaField.style.color = '#495057';
+            }
+        }
+        
+        function togglePaControls(patientId) {
+            const row = document.getElementById(`pa_row_${patientId}`);
+            const checkbox = document.getElementById(`enable_pa_${patientId}`);
+            if (row && checkbox) {
+                row.style.display = checkbox.checked ? 'table-row' : 'none';
+            }
+        }
+        
+        function validateInput(input, type) {
+            if (type === 'decimal') {
+                input.value = input.value.replace(/[^0-9,.]/g, '');
+                input.value = input.value.replace(',', '.');
+                const parts = input.value.split('.');
+                if (parts.length > 2) {
+                    input.value = parts[0] + '.' + parts[1];
+                }
+                if (parseFloat(input.value) < 0) {
+                    alert('Valor não pode ser negativo!');
+                    input.value = '';
+                }
+            }
+        }
+        
+        function generateReport() {
+            const reportDate = document.getElementById('reportDate').value;
+            const patientCards = document.querySelectorAll('.patient-card');
+            
+            if (patientCards.length === 0) {
+                alert('⚠️ Adicione pelo menos um paciente para gerar o relatório!');
+                return;
+            }
+            
+            let report = `🏥 RELATÓRIO UTI - ${formatDate(reportDate)}\n`;
+            report += `${'='.repeat(50)}\n\n`;
+            
+            patientCards.forEach((card) => {
+                const patientId = card.getAttribute('data-patient-id');
+                const leito = getValue(`leito_${patientId}`);
+                const nome = getValue(`nome_${patientId}`);
+                
+                if (!leito && !nome) return;
+                
+                report += `👤 PACIENTE - LEITO ${leito || 'N/I'}\n`;
+                report += `Nome: ${nome || 'Não informado'}\n`;
+                report += `${'-'.repeat(30)}\n`;
+                
+                // Sinais Vitais
+                const pa = getValue(`pa_${patientId}`);
+                const fc = getValue(`fc_${patientId}`);
+                const fr = getValue(`fr_${patientId}`);
+                const pam = getValue(`pam_${patientId}`);
+                const tax = getValue(`tax_${patientId}`);
+                const spo2 = getValue(`spo2_${patientId}`);
+                
+                if (pa || fc || fr || pam || tax || spo2) {
+                    report += `📊 SINAIS VITAIS:\n`;
+                    if (pa) report += `• P.A.: ${pa}\n`;
+                    if (fc) report += `• FC: ${fc}\n`;
+                    if (fr) report += `• FR: ${fr}\n`;
+                    if (pam) report += `• PAM: ${pam}\n`;
+                    if (tax) report += `• T. Axilar: ${tax}\n`;
+                    if (spo2) report += `• SpO₂: ${spo2}\n`;
+                    report += `\n`;
+                }
+                
+                // Controles por horário
+                const horarios = ['20', '22', '00', '02', '04', '06'];
+                let temControles = false;
+                
+                report += `⏰ CONTROLES POR HORÁRIO:\n`;
+                
+                if (getValue(`enable_pa_${patientId}`)) {
+                    let paValues = horarios.map(h => getValue(`pa_${h}_${patientId}`)).filter(v => v);
+                    if (paValues.length > 0) {
+                        report += `• PA: `;
+                        horarios.forEach(h => {
+                            const valor = getValue(`pa_${h}_${patientId}`);
+                            if (valor) report += `${h}h:${valor} `;
+                        });
+                        report += `\n`;
+                        temControles = true;
+                    }
+                }
+                
+                let hgtValues = horarios.map(h => getValue(`hgt_${h}_${patientId}`)).filter(v => v);
+                if (hgtValues.length > 0) {
+                    report += `• HGT: `;
+                    horarios.forEach(h => {
+                        const valor = getValue(`hgt_${h}_${patientId}`);
+                        if (valor) report += `${h}h:${valor} `;
+                    });
+                    report += `\n`;
+                    temControles = true;
+                }
+                
+                let taValues = horarios.map(h => getValue(`ta_${h}_${patientId}`)).filter(v => v);
+                if (taValues.length > 0) {
+                    report += `• TA: `;
+                    horarios.forEach(h => {
+                        const valor = getValue(`ta_${h}_${patientId}`);
+                        if (valor) report += `${h}h:${valor} `;
+                    });
+                    report += `\n`;
+                    temControles = true;
+                }
+                
+                const deltaHgt = getValue(`delta_hgt_${patientId}`);
+                if (deltaHgt) {
+                    report += `• Delta-HGT: ${deltaHgt}\n`;
+                    temControles = true;
+                }
+                
+                if (!temControles) {
+                    report += `Nenhum controle registrado\n`;
+                }
+                report += `\n`;
+                
+                // Balanço Hídrico
+                const fluidosStr = getValue(`fluidos_${patientId}`);
+                const fluidosSum = sumExpression(fluidosStr);
+                const outrosStr = getValue(`outros_${patientId}`);
+                const outrosSum = sumExpression(outrosStr);
+                const diureseStr = getValue(`diurese_${patientId}`);
+                const diureseSum = sumExpression(diureseStr);
+                const diureseBolsaStr = getValue(`diurese_bolsa_${patientId}`);
+                const diureseBolsaSum = sumExpression(diureseBolsaStr);
+                const total = getValue(`total_${patientId}`);
+                
+                if (fluidosStr || outrosStr || diureseStr || diureseBolsaStr || total) {
+                    report += `💧 BALANÇO HÍDRICO (24h):\n`;
+                    if (fluidosStr) report += `• Fluidos: ${fluidosStr.includes('+') ? fluidosStr + ' = ' : ''}${fluidosSum.toFixed(2)}ml\n`;
+                    if (outrosStr) report += `• Outros fluidos administrados: ${outrosStr.includes('+') ? outrosStr + ' = ' : ''}${outrosSum.toFixed(2)}ml\n`;
+                    if (diureseStr) report += `• Diurese: ${diureseStr.includes('+') ? diureseStr + ' = ' : ''}${diureseSum.toFixed(2)}ml\n`;
+                    if (diureseBolsaStr) report += `• Diurese em bolsa: ${diureseBolsaStr.includes('+') ? diureseBolsaStr + ' = ' : ''}${diureseBolsaSum.toFixed(2)}ml\n`;
+                    if (total) report += `• Total: ${total}ml\n`;
+                    report += `\n`;
+                }
+                
+                // Antibioticoterapia
+                const antibiotico = getValue(`antibiotico_${patientId}`);
+                const antibioticoDia = getValue(`antibiotico_dia_${patientId}`);
+                if (antibiotico || antibioticoDia) {
+                    report += `💊 ANTIBIOTICOTERAPIA:\n`;
+                    if (antibiotico) report += `• Antibiótico: ${antibiotico}\n`;
+                    if (antibioticoDia) report += `• Dia de uso: ${antibioticoDia}\n`;
+                    report += `\n`;
+                }
+                
+                // Eliminações
+                const evacuacoes = getValue(`evacuacoes_${patientId}`);
+                if (evacuacoes) {
+                    report += `🚽 ELIMINAÇÕES:\n`;
+                    report += `• Evacuações: ${evacuacoes}\n\n`;
+                }
+                
+                // Dispositivos
+                const dispositivos = [];
+                if (getValue(`cvc_${patientId}`)) dispositivos.push('CVC');
+                if (getValue(`avp_${patientId}`)) dispositivos.push('AVP');
+                if (getValue(`svd_${patientId}`)) dispositivos.push('SVD');
+                if (getValue(`tot_${patientId}`)) dispositivos.push('TOT/Traq');
+                if (getValue(`sng_${patientId}`)) dispositivos.push('SNG/SNE');
+                if (getValue(`linha_arterial_${patientId}`)) dispositivos.push('Linha Arterial (PAM)');
+                
+                const drenos = getValue(`drenos_${patientId}`);
+                if (drenos) dispositivos.push(`Drenos: ${drenos}`);
+                
+                const dvas = [];
+                const dvaContainer = document.getElementById(`dva_container_${patientId}`);
+                if (dvaContainer) {
+                    dvaContainer.querySelectorAll('.dva-row').forEach(row => {
+                        const index = row.dataset.dvaId || 0;
+                        const nome = getValue(`dva_nome_${index}_${patientId}`);
+                        const dose = getValue(`dva_dose_${index}_${patientId}`);
+                        if (nome || dose) {
+                            dvas.push(`${nome || 'DVA não especificada'}${dose ? ` (${dose})` : ''}`);
+                        }
+                    });
+                }
+                if (dvas.length > 0) {
+                    dispositivos.push(...dvas.map(dva => `DVA: ${dva}`));
+                }
+                
+                if (dispositivos.length > 0) {
+                    report += `🔧 DISPOSITIVOS EM USO:\n`;
+                    dispositivos.forEach(disp => report += `• ${disp}\n`);
+                    report += `\n`;
+                }
+                
+                // Observações
+                const observacoes = getValue(`observacoes_${patientId}`);
+                if (observacoes) {
+                    report += `📝 OBSERVAÇÕES:\n`;
+                    report += `${observacoes}\n\n`;
+                }
+                
+                report += `${'='.repeat(50)}\n\n`;
+            });
+            
+            report += `📅 Relatório gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
+            
+            document.getElementById('reportContent').textContent = report;
+            document.getElementById('reportSection').style.display = 'block';
+            document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyReport() {
+            const reportContent = document.getElementById('reportContent').textContent;
+            navigator.clipboard.writeText(reportContent).then(() => {
+                alert('✅ Relatório copiado para a área de transferência!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = reportContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Relatório copiado para a área de transferência!');
+            });
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return new Date().toLocaleDateString('pt-BR');
+            return new Date(dateString + 'T12:00:00').toLocaleDateString('pt-BR');
+        }
+        
+        function saveData() {
+            const data = {
+                reportDate: document.getElementById('reportDate').value,
+                patients: [],
+                patientCounter: patientCounter,
+                dvaCounters: dvaCounters,
+                darkMode: document.body.classList.contains('dark-mode')
+            };
+            
+            document.querySelectorAll('.patient-card').forEach(card => {
+                const id = card.dataset.patientId;
+                const patientData = {};
+                const inputs = card.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    if (input.id) {
+                        if (input.type === 'checkbox') {
+                            patientData[input.id] = input.checked;
+                        } else {
+                            patientData[input.id] = input.value;
+                        }
+                    }
+                });
+                data.patients.push({id: id, data: patientData});
+            });
+            
+            localStorage.setItem('utiData', JSON.stringify(data));
+        }
+        
+        function loadData() {
+            const savedData = localStorage.getItem('utiData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('reportDate').value = data.reportDate;
+                patientCounter = data.patientCounter || 0;
+                dvaCounters = data.dvaCounters || {};
+                
+                data.patients.forEach(patient => {
+                    // Criar o cartão do paciente antes de manipular os campos
+                    addPatient();
+                    const patientId = patient.id;
+                    const card = document.querySelector(`[data-patient-id="${patientId}"]`);
+                    if (!card) return; // Evitar manipulação se o cartão não foi criado
+                    
+                    // Restaurar os dados básicos do paciente
+                    Object.keys(patient.data).forEach(key => {
+                        if (!key.startsWith('dva_nome_') && !key.startsWith('dva_dose_')) {
+                            const elem = document.getElementById(key);
+                            if (elem) {
+                                if (elem.type === 'checkbox') {
+                                    elem.checked = patient.data[key];
+                                } else {
+                                    elem.value = patient.data[key];
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Restaurar DVAs
+                    const dvaContainer = document.getElementById(`dva_container_${patientId}`);
+                    if (dvaContainer) {
+                        dvaContainer.innerHTML = `
+                            <div class="dva-row" data-dva-id="0">
+                                <input type="text" id="dva_nome_0_${patientId}" placeholder="Droga vasoativa" oninput="saveData();" value="${patient.data[`dva_nome_0_${patientId}`] || ''}">
+                                <input type="text" id="dva_dose_0_${patientId}" placeholder="Dose (ex: mcg/kg/min)" oninput="saveData();" value="${patient.data[`dva_dose_0_${patientId}`] || ''}">
+                                <button class="btn remove-dva-btn" style="display: none;" onclick="removeDva(${patientId}, 0)">🗑️</button>
+                            </div>
+                        `;
+                        
+                        let maxDvaIndex = 0;
+                        Object.keys(patient.data).forEach(key => {
+                            if (key.startsWith('dva_nome_') && !key.startsWith('dva_nome_0_')) {
+                                const index = parseInt(key.split('_')[2]);
+                                maxDvaIndex = Math.max(maxDvaIndex, index);
+                                const dvaHtml = `
+                                    <div class="dva-row" data-dva-id="${index}">
+                                        <input type="text" id="dva_nome_${index}_${patientId}" placeholder="Droga vasoativa" oninput="saveData();" value="${patient.data[`dva_nome_${index}_${patientId}`] || ''}">
+                                        <input type="text" id="dva_dose_${index}_${patientId}" placeholder="Dose (ex: mcg/kg/min)" oninput="saveData();" value="${patient.data[`dva_dose_${index}_${patientId}`] || ''}">
+                                        <button class="btn remove-dva-btn" onclick="removeDva(${patientId}, ${index})">🗑️</button>
+                                    </div>
+                                `;
+                                dvaContainer.insertAdjacentHTML('beforeend', dvaHtml);
+                            }
+                        });
+                        dvaCounters[patientId] = maxDvaIndex;
+                    }
+                    
+                    // Atualizar cálculos e controles
+                    calculateBalance(patientId);
+                    calculateDeltaHGT(patientId);
+                    togglePaControls(patientId);
+                });
+                
+                if (data.darkMode) {
+                    toggleDarkMode(true);
+                }
+                
+                if (data.patients.length > 0) {
+                    showTab('pacientes', parseInt(data.patients[0].id));
+                } else {
+                    addPatient();
+                }
+            } else {
+                addPatient();
+            }
+        }
+        
+        function resetAllData() {
+            if (confirm('Tem certeza que deseja resetar todos os dados? Isso não pode ser desfeito.')) {
+                localStorage.removeItem('utiData');
+                location.reload();
+            }
+        }
+        
+        function toggleDarkMode(load = false) {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.getElementById('darkModeToggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+            if (!load) saveData();
+        }
+        
+        function resetCalculadoras() {
+            const calcInputs = document.querySelectorAll('#calculadoras input, #calculadoras select');
+            calcInputs.forEach(input => {
+                if (input.type === 'text') {
+                    input.value = '';
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                }
+            });
+            document.getElementById('ckdResult').innerText = '';
+            document.getElementById('infusionResult').innerText = '';
+            document.getElementById('sofaResult').innerText = '';
+            document.getElementById('gcsResult').innerText = '';
+            document.getElementById('apacheResult').innerText = '';
+        }
+        
+        function setupCalculadoras() {
+            const calcHtml = `
+                <h2>Calculadoras Médicas</h2>
+                <button class="btn btn-reset" onclick="resetCalculadoras()">🗑️ Zerar Calculadoras</button>
+
+                <details>
+                    <summary>TFG CKD-EPI</summary>
+                    <div class="calc-content">
+                        <div class="form-group">
+                            <label>Idade:</label>
+                            <input type="text" id="age" placeholder="anos" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo:</label>
+                            <select id="sex"><option value="male">Masculino</option><option value="female">Feminino</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Creatinina:</label>
+                            <input type="text" id="creat" placeholder="mg/dL" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Raça:</label>
+                            <select id="race"><option value="nonblack">Não negro</option><option value="black">Negro</option></select>
+                        </div>
+                        <button type="button" class="btn" onclick="calcCKD()">Calcular</button>
+                        <p id="ckdResult"></p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Conversor Infusão (ml/h ↔ mcg/kg/min)</summary>
+                    <div class="calc-content">
+                        <div class="form-group">
+                            <label>Modo:</label>
+                            <select id="mode"><option value="toMcg">ml/h para mcg/kg/min</option><option value="toMl">mcg/kg/min para ml/h</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Dose mcg/kg/min:</label>
+                            <input type="text" id="dose" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Peso (kg):</label>
+                            <input type="text" id="weight" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Concentração (mcg/mL):</label>
+                            <input type="text" id="conc" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Taxa ml/h:</label>
+                            <input type="text" id="rate" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <button type="button" class="btn" onclick="calcInfusion()">Calcular</button>
+                        <p id="infusionResult"></p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Score SOFA</summary>
+                    <div class="calc-content">
+                        <div class="form-group">
+                            <label>Respiração (PaO2/FiO2):</label>
+                            <input type="text" id="resp" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Plaquetas (x10^3/µL):</label>
+                            <input type="text" id="plat" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Bilirrubina (mg/dL):</label>
+                            <input type="text" id="bili" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Cardiovascular (MAP ou Vasoativos):</label>
+                            <input type="text" id="cv" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Glasgow (SNC):</label>
+                            <input type="text" id="gcs" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Creatinina (mg/dL) ou Diurese (mL/dia):</label>
+                            <input type="text" id="renal" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <button type="button" class="btn" onclick="calcSOFA()">Calcular</button>
+                        <p id="sofaResult"></p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Glasgow Coma Scale (GCS)</summary>
+                    <div class="calc-content">
+                        <div class="form-group">
+                            <label>Abertura Ocular:</label>
+                            <select id="eyes"><option value="4">Espontânea (4)</option><option value="3">À voz (3)</option><option value="2">À dor (2)</option><option value="1">Nenhuma (1)</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Resposta Verbal:</label>
+                            <select id="verbal"><option value="5">Orientado (5)</option><option value="4">Confuso (4)</option><option value="3">Palavras inadequadas (3)</option><option value="2">Sons incompreensíveis (2)</option><option value="1">Nenhuma (1)</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Resposta Motora:</label>
+                            <select id="motor"><option value="6">Obedece comandos (6)</option><option value="5">Localiza dor (5)</option><option value="4">Retirada à dor (4)</option><option value="3">Flexão anormal (3)</option><option value="2">Extensão anormal (2)</option><option value="1">Nenhuma (1)</option></select>
+                        </div>
+                        <button type="button" class="btn" onclick="calcGCS()">Calcular</button>
+                        <p id="gcsResult"></p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>APACHE II Score</summary>
+                    <div class="calc-content">
+                        <div class="form-group">
+                            <label>Idade:</label>
+                            <input type="text" id="apacheAge" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>Temperatura (°C):</label>
+                            <input type="text" id="apacheTemp" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>PAM (mmHg):</label>
+                            <input type="text" id="apachePam" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>FC (bpm):</label>
+                            <input type="text" id="apacheFc" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <div class="form-group">
+                            <label>FR (rpm):</label>
+                            <input type="text" id="apacheFr" oninput="validateInput(this, 'decimal');">
+                        </div>
+                        <button type="button" class="btn" onclick="calcApache()">Calcular</button>
+                        <p id="apacheResult"></p>
+                    </div>
+                </details>
+            `;
+            document.getElementById('calculadoras').innerHTML = calcHtml;
+        }
+        
+        function calcCKD() {
+            let age = parseFloat(document.getElementById('age').value.replace(',', '.'));
+            let creat = parseFloat(document.getElementById('creat').value.replace(',', '.'));
+            let sex = document.getElementById('sex').value;
+            let race = document.getElementById('race').value;
+            
+            if (isNaN(age) || isNaN(creat) || age <= 0 || creat <= 0) {
+                document.getElementById('ckdResult').innerText = 'Preencha idade e creatinina com valores válidos.';
+                return;
+            }
+            
+            // CKD-EPI formula: eGFR = 141 * min(Scr/κ, 1)^α * max(Scr/κ, 1)^-1.209 * 0.993^Age * sex_factor * race_factor
+            let kappa = sex === 'female' ? 0.7 : 0.9;
+            let alpha = sex === 'female' ? -0.329 : -0.411;
+            let sex_factor = sex === 'female' ? 1.018 : 1;
+            let race_factor = race === 'black' ? 1.159 : 1;
+            
+            let min_term = Math.min(creat / kappa, 1);
+            let max_term = Math.max(creat / kappa, 1);
+            let gfr = 141 * Math.pow(min_term, alpha) * Math.pow(max_term, -1.209) * Math.pow(0.993, age) * sex_factor * race_factor;
+            
+            document.getElementById('ckdResult').innerText = `eGFR: ${gfr.toFixed(2)} mL/min/1.73m²`;
+        }
+        
+        function calcInfusion() {
+            let mode = document.getElementById('mode').value;
+            let weight = parseFloat(document.getElementById('weight').value.replace(',', '.'));
+            let conc = parseFloat(document.getElementById('conc').value.replace(',', '.'));
+            
+            if (isNaN(weight) || isNaN(conc) || weight <= 0 || conc <= 0) {
+                document.getElementById('infusionResult').innerText = 'Preencha peso e concentração com valores válidos.';
+                return;
+            }
+            
+            if (mode === 'toMcg') {
+                let rate = parseFloat(document.getElementById('rate').value.replace(',', '.'));
+                if (isNaN(rate) || rate <= 0) {
+                    document.getElementById('infusionResult').innerText = 'Preencha taxa ml/h com valor válido.';
+                    return;
+                }
+                let dose = (rate * conc) / (weight * 60);
+                document.getElementById('infusionResult').innerText = `Dose: ${dose.toFixed(2)} mcg/kg/min`;
+            } else {
+                let dose = parseFloat(document.getElementById('dose').value.replace(',', '.'));
+                if (isNaN(dose) || dose <= 0) {
+                    document.getElementById('infusionResult').innerText = 'Preencha dose mcg/kg/min com valor válido.';
+                    return;
+                }
+                let rate = (dose * weight * 60) / conc;
+                document.getElementById('infusionResult').innerText = `Taxa: ${rate.toFixed(2)} ml/h`;
+            }
+        }
+        
+        function calcSOFA() {
+            let resp = parseFloat(document.getElementById('resp').value.replace(',', '.'));
+            let plat = parseFloat(document.getElementById('plat').value.replace(',', '.'));
+            let bili = parseFloat(document.getElementById('bili').value.replace(',', '.'));
+            let cv = parseFloat(document.getElementById('cv').value.replace(',', '.'));
+            let gcs = parseFloat(document.getElementById('gcs').value.replace(',', '.'));
+            let renal = parseFloat(document.getElementById('renal').value.replace(',', '.'));
+            
+            if (isNaN(resp) || isNaN(plat) || isNaN(bili) || isNaN(cv) || isNaN(gcs) || isNaN(renal)) {
+                document.getElementById('sofaResult').innerText = 'Preencha todos os campos com valores válidos.';
+                return;
+            }
+            
+            let scoreResp = 0;
+            if (resp < 100) scoreResp = 4;
+            else if (resp < 200) scoreResp = 3;
+            else if (resp < 300) scoreResp = 2;
+            else if (resp < 400) scoreResp = 1;
+            
+            let scorePlat = 0;
+            if (plat < 20) scorePlat = 4;
+            else if (plat < 50) scorePlat = 3;
+            else if (plat < 100) scorePlat = 2;
+            else if (plat < 150) scorePlat = 1;
+            
+            let scoreBili = 0;
+            if (bili >= 12) scoreBili = 4;
+            else if (bili >= 6) scoreBili = 3;
+            else if (bili >= 2) scoreBili = 2;
+            else if (bili >= 1.2) scoreBili = 1;
+            
+            let scoreCv = 0;
+            if (cv > 15 || cv > 0.1) scoreCv = 4;
+            else if (cv >= 5 || cv <= 0.1) scoreCv = 3;
+            else if (cv > 0) scoreCv = 2;
+            else if (cv < 70) scoreCv = 1;
+            
+            let scoreGcs = 0;
+            if (gcs < 6) scoreGcs = 4;
+            else if (gcs < 10) scoreGcs = 3;
+            else if (gcs < 13) scoreGcs = 2;
+            else if (gcs < 15) scoreGcs = 1;
+            
+            let scoreRenal = 0;
+            if (renal >= 5 || renal < 200) scoreRenal = 4;
+            else if (renal >= 3.5 || renal < 500) scoreRenal = 3;
+            else if (renal >= 2) scoreRenal = 2;
+            else if (renal >= 1.2) scoreRenal = 1;
+            
+            let total = scoreResp + scorePlat + scoreBili + scoreCv + scoreGcs + scoreRenal;
+            document.getElementById('sofaResult').innerText = `SOFA Total: ${total}`;
+        }
+        
+        function calcGCS() {
+            let eyes = parseInt(document.getElementById('eyes').value);
+            let verbal = parseInt(document.getElementById('verbal').value);
+            let motor = parseInt(document.getElementById('motor').value);
+            if (isNaN(eyes) || isNaN(verbal) || isNaN(motor)) {
+                document.getElementById('gcsResult').innerText = 'Selecione todas as opções.';
+                return;
+            }
+            let total = eyes + verbal + motor;
+            document.getElementById('gcsResult').innerText = `GCS Total: ${total}`;
+        }
+        
+        function calcApache() {
+            let age = parseFloat(document.getElementById('apacheAge').value.replace(',', '.'));
+            let temp = parseFloat(document.getElementById('apacheTemp').value.replace(',', '.'));
+            let pam = parseFloat(document.getElementById('apachePam').value.replace(',', '.'));
+            let fc = parseFloat(document.getElementById('apacheFc').value.replace(',', '.'));
+            let fr = parseFloat(document.getElementById('apacheFr').value.replace(',', '.'));
+            
+            if (isNaN(age) || isNaN(temp) || isNaN(pam) || isNaN(fc) || isNaN(fr)) {
+                document.getElementById('apacheResult').innerText = 'Preencha todos os campos com valores válidos.';
+                return;
+            }
+            
+            let score = 0;
+            if (age >= 75) score += 6;
+            else if (age >= 65) score += 5;
+            else if (age >= 55) score += 3;
+            else if (age >= 45) score += 2;
+            
+            if (temp >= 41 || temp < 30) score += 4;
+            else if (temp >= 39 || temp < 32) score += 3;
+            else if (temp >= 38.5 || temp < 34) score += 1;
+            
+            if (pam >= 160 || pam < 50) score += 4;
+            else if (pam >= 130 || pam < 70) score += 3;
+            else if (pam < 110) score += 2;
+            
+            if (fc >= 180 || fc < 40) score += 4;
+            else if (fc >= 140 || fc < 55) score += 3;
+            else if (fc >= 110 || fc < 70) score += 2;
+            
+            if (fr >= 50 || fr < 6) score += 4;
+            else if (fr >= 35 || fr < 10) score += 3;
+            else if (fr >= 25 || fr < 12) score += 1;
+            
+            document.getElementById('apacheResult').innerText = `APACHE II: ${score} (simplificado)`;
+        }
+    </script>
+</body>
+</html>
