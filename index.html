@@ -243,10 +243,26 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            flex-wrap: wrap; /* Permite quebra se necessário em telas pequenas */
         }
         
         .checkbox-item input[type="checkbox"] {
             width: auto;
+        }
+        
+        .device-details {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .device-details select,
+        .device-details input {
+            width: auto;
+            min-width: 80px; /* Tamanho mínimo para select e input */
+            padding: 4px;
+            font-size: 12px;
         }
         
         .btn {
@@ -505,6 +521,55 @@
             background: #c82333;
         }
         
+        .increment-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .increment-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .increment-btn:hover {
+            background: #138496;
+        }
+        
+        .antibiotico-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .add-antibiotico-btn {
+            background: #17a2b8;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .add-antibiotico-btn:hover {
+            background: #138496;
+        }
+        
+        .remove-antibiotico-btn {
+            background: #dc3545;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .remove-antibiotico-btn:hover {
+            background: #c82333;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 margin: 0;
@@ -534,6 +599,7 @@
         </div>
         
         <div class="content">
+            <button id="darkModeToggle" class="btn" onclick="toggleDarkMode()">🌙 Modo Escuro</button>
             <button class="btn" onclick="addPatient()">➕ Adicionar Paciente</button>
 
             <div id="tabBar" class="tab-bar"></div>
@@ -549,12 +615,11 @@
                 <button class="btn copy-btn" onclick="copyReport()">📋 Copiar Relatório</button>
             </div>
             
-            <button id="darkModeToggle" class="btn" onclick="toggleDarkMode()">🌙 Modo Escuro</button>
             <button id="resetAll" class="btn" onclick="resetAllData()">🗑️ Resetar Tudo</button>
         </div>
 
         <div class="footer">
-            <p>Criado por Henrique Ceron</p>
+            <p>Criado por Henrique Ceron - 2025</p>
         </div>
     </div>
 
@@ -563,6 +628,7 @@
         let currentTab = 'pacientes';
         let currentPatientId = null;
         let dvaCounters = {};
+        let antibioticoCounters = {};
 
         // Define a data atual como padrão
         document.getElementById('reportDate').valueAsDate = new Date();
@@ -577,6 +643,7 @@
         function addPatient() {
             patientCounter++;
             dvaCounters[patientCounter] = 0;
+            antibioticoCounters[patientCounter] = 0;
             const patientHtml = `
                 <div class="patient-card" data-patient-id="${patientCounter}">
                     <div class="patient-header">
@@ -662,14 +729,38 @@
                         <div class="form-group">
                             <label>Fluidos (ml):</label>
                             <input type="text" id="fluidos_${patientCounter}" placeholder="Ex: 200+500+700" oninput="calculateBalance(${patientCounter}); saveData();">
+                            <div class="increment-buttons" id="fluidos_buttons_${patientCounter}">
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 5)">+5</button>
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 10)">+10</button>
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 50)">+50</button>
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 100)">+100</button>
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 200)">+200</button>
+                                <button class="increment-btn" onclick="addToField('fluidos', ${patientCounter}, 500)">+500</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Outros fluidos administrados (ml):</label>
                             <input type="text" id="outros_${patientCounter}" placeholder="Ex: 50+100 (gotejos, etc.)" oninput="calculateBalance(${patientCounter}); saveData();">
+                            <div class="increment-buttons" id="outros_buttons_${patientCounter}">
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 5)">+5</button>
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 10)">+10</button>
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 50)">+50</button>
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 100)">+100</button>
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 200)">+200</button>
+                                <button class="increment-btn" onclick="addToField('outros', ${patientCounter}, 500)">+500</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Diurese (ml):</label>
                             <input type="text" id="diurese_${patientCounter}" placeholder="Ex: 100+200+300" oninput="calculateBalance(${patientCounter}); saveData();">
+                            <div class="increment-buttons" id="diurese_buttons_${patientCounter}">
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 5)">+5</button>
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 10)">+10</button>
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 50)">+50</button>
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 100)">+100</button>
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 200)">+200</button>
+                                <button class="increment-btn" onclick="addToField('diurese', ${patientCounter}, 500)">+500</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Diurese em bolsa (ml):</label>
@@ -688,26 +779,54 @@
                     
                     <div class="form-group">
                         <label>Antibioticoterapia:</label>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <input type="text" id="antibiotico_${patientCounter}" placeholder="Nome do antibiótico" oninput="saveData();">
-                            </div>
-                            <div class="form-group">
-                                <input type="text" id="antibiotico_dia_${patientCounter}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();">
+                        <div class="antibiotico-container" id="antibiotico_container_${patientCounter}">
+                            <div class="form-row antibiotico-row" data-antibiotico-id="0">
+                                <input type="text" id="antibiotico_nome_0_${patientCounter}" placeholder="Nome do antibiótico" oninput="saveData();">
+                                <input type="text" id="antibiotico_dia_0_${patientCounter}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();">
+                                <button class="btn remove-antibiotico-btn" style="display: none;" onclick="removeAntibiotico(${patientCounter}, 0)">🗑️</button>
                             </div>
                         </div>
+                        <button class="btn add-antibiotico-btn" onclick="addAntibiotico(${patientCounter})">➕ Adicionar Antibiótico</button>
                     </div>
                     
                     <div class="form-group">
                         <label>Dispositivos em Uso:</label>
                         <div class="checkbox-group">
                             <div class="checkbox-item">
-                                <input type="checkbox" id="cvc_${patientCounter}" onclick="saveData();">
+                                <input type="checkbox" id="cvc_${patientCounter}" onclick="toggleDeviceDetails('cvc', ${patientCounter}); saveData();">
                                 <label for="cvc_${patientCounter}">CVC</label>
+                                <div id="cvc_details_${patientCounter}" class="device-details">
+                                    <select id="cvc_side_${patientCounter}" onchange="saveData();">
+                                        <option value="">Lado</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                    <input type="text" id="cvc_local_${patientCounter}" placeholder="Local exato" oninput="saveData();">
+                                </div>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" id="avp_${patientCounter}" onclick="saveData();">
+                                <input type="checkbox" id="avp_${patientCounter}" onclick="toggleDeviceDetails('avp', ${patientCounter}); saveData();">
                                 <label for="avp_${patientCounter}">AVP</label>
+                                <div id="avp_details_${patientCounter}" class="device-details">
+                                    <select id="avp_side_${patientCounter}" onchange="saveData();">
+                                        <option value="">Lado</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                    <input type="text" id="avp_local_${patientCounter}" placeholder="Local exato" oninput="saveData();">
+                                </div>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="linha_arterial_${patientCounter}" onclick="toggleDeviceDetails('linha_arterial', ${patientCounter}); saveData();">
+                                <label for="linha_arterial_${patientCounter}">Linha Arterial (PAM)</label>
+                                <div id="linha_arterial_details_${patientCounter}" class="device-details">
+                                    <select id="linha_arterial_side_${patientCounter}" onchange="saveData();">
+                                        <option value="">Lado</option>
+                                        <option value="D">D</option>
+                                        <option value="E">E</option>
+                                    </select>
+                                    <input type="text" id="linha_arterial_local_${patientCounter}" placeholder="Local exato" oninput="saveData();">
+                                </div>
                             </div>
                             <div class="checkbox-item">
                                 <input type="checkbox" id="svd_${patientCounter}" onclick="saveData();">
@@ -720,10 +839,6 @@
                             <div class="checkbox-item">
                                 <input type="checkbox" id="sng_${patientCounter}" onclick="saveData();">
                                 <label for="sng_${patientCounter}">SNG/SNE</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="linha_arterial_${patientCounter}" onclick="saveData();">
-                                <label for="linha_arterial_${patientCounter}">Linha Arterial (PAM)</label>
                             </div>
                         </div>
                         <div class="dva-container" id="dva_container_${patientCounter}">
@@ -742,6 +857,38 @@
                     <div class="form-group">
                         <label>Observações:</label>
                         <textarea id="observacoes_${patientCounter}" rows="3" placeholder="Observações importantes do plantão..." oninput="saveData();"></textarea>
+                    </div>
+                    <button class="btn" onclick="toggleSOFA(${patientCounter})">Calcular SOFA</button>
+                    <div class="form-group" id="sofa_section_${patientCounter}" style="display: none;">
+                        <label>Score SOFA:</label>
+                        <div class="calc-content">
+                            <div class="form-group">
+                                <label>Respiração (PaO2/FiO2):</label>
+                                <input type="text" id="sofa_resp_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <div class="form-group">
+                                <label>Plaquetas (x10^3/µL):</label>
+                                <input type="text" id="sofa_plat_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <div class="form-group">
+                                <label>Bilirrubina (mg/dL):</label>
+                                <input type="text" id="sofa_bili_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <div class="form-group">
+                                <label>Cardiovascular (MAP ou Vasoativos):</label>
+                                <input type="text" id="sofa_cv_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <div class="form-group">
+                                <label>Glasgow (SNC):</label>
+                                <input type="text" id="sofa_gcs_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <div class="form-group">
+                                <label>Creatinina (mg/dL) ou Diurese (mL/dia):</label>
+                                <input type="text" id="sofa_renal_${patientCounter}" oninput="validateInput(this, 'decimal'); saveData();">
+                            </div>
+                            <button type="button" class="btn" onclick="calcSOFA(${patientCounter})">Resultado SOFA</button>
+                            <p id="sofaResult_${patientCounter}"></p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -777,11 +924,37 @@
             }
         }
         
+        function addAntibiotico(patientId) {
+            antibioticoCounters[patientId] = (antibioticoCounters[patientId] || 0) + 1;
+            const index = antibioticoCounters[patientId];
+            const html = `
+                <div class="form-row antibiotico-row" data-antibiotico-id="${index}">
+                    <input type="text" id="antibiotico_nome_${index}_${patientId}" placeholder="Nome do antibiótico" oninput="saveData();">
+                    <input type="text" id="antibiotico_dia_${index}_${patientId}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();">
+                    <button class="btn remove-antibiotico-btn" onclick="removeAntibiotico(${patientId}, ${index})">🗑️</button>
+                </div>
+            `;
+            const container = document.getElementById(`antibiotico_container_${patientId}`);
+            if (container) {
+                container.insertAdjacentHTML('beforeend', html);
+                saveData();
+            }
+        }
+        
+        function removeAntibiotico(patientId, index) {
+            const row = document.querySelector(`#antibiotico_container_${patientId} [data-antibiotico-id="${index}"]`);
+            if (row) {
+                row.remove();
+                saveData();
+            }
+        }
+        
         function deletePatient(patientId) {
             const patientCard = document.querySelector(`[data-patient-id="${patientId}"]`);
             if (patientCard) {
                 patientCard.remove();
                 delete dvaCounters[patientId];
+                delete antibioticoCounters[patientId];
             }
             if (currentTab === 'pacientes' && currentPatientId === patientId) {
                 const remainingCards = document.querySelectorAll('.patient-card');
@@ -937,6 +1110,34 @@
                 row.style.display = checkbox.checked ? 'table-row' : 'none';
             }
         }
+
+        function toggleDeviceDetails(device, patientId) {
+            const checkbox = document.getElementById(`${device}_${patientId}`);
+            const details = document.getElementById(`${device}_details_${patientId}`);
+            if (details && checkbox) {
+                details.style.display = checkbox.checked ? 'flex' : 'none';
+            }
+        }
+        
+        function addToField(field, patientId, value) {
+            const input = document.getElementById(`${field}_${patientId}`);
+            if (input) {
+                if (input.value) {
+                    input.value += `+${value}`;
+                } else {
+                    input.value = `${value}`;
+                }
+                calculateBalance(patientId);
+                saveData();
+            }
+        }
+        
+        function toggleSOFA(patientId) {
+            const section = document.getElementById(`sofa_section_${patientId}`);
+            if (section) {
+                section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            }
+        }
         
         function validateInput(input, type) {
             if (type === 'decimal') {
@@ -1069,12 +1270,21 @@
                 }
                 
                 // Antibioticoterapia
-                const antibiotico = getValue(`antibiotico_${patientId}`);
-                const antibioticoDia = getValue(`antibiotico_dia_${patientId}`);
-                if (antibiotico || antibioticoDia) {
+                const antibioticos = [];
+                const antibioticoContainer = document.getElementById(`antibiotico_container_${patientId}`);
+                if (antibioticoContainer) {
+                    antibioticoContainer.querySelectorAll('.antibiotico-row').forEach(row => {
+                        const index = row.dataset.antibioticoId || 0;
+                        const nome = getValue(`antibiotico_nome_${index}_${patientId}`);
+                        const dia = getValue(`antibiotico_dia_${index}_${patientId}`);
+                        if (nome || dia) {
+                            antibioticos.push(`${nome || 'Antibiótico não especificado'}${dia ? ` - ${dia}` : ''}`);
+                        }
+                    });
+                }
+                if (antibioticos.length > 0) {
                     report += `💊 ANTIBIOTICOTERAPIA:\n`;
-                    if (antibiotico) report += `• Antibiótico: ${antibiotico}\n`;
-                    if (antibioticoDia) report += `• Dia de uso: ${antibioticoDia}\n`;
+                    antibioticos.forEach(ab => report += `• ${ab}\n`);
                     report += `\n`;
                 }
                 
@@ -1087,12 +1297,24 @@
                 
                 // Dispositivos
                 const dispositivos = [];
-                if (getValue(`cvc_${patientId}`)) dispositivos.push('CVC');
-                if (getValue(`avp_${patientId}`)) dispositivos.push('AVP');
+                if (getValue(`cvc_${patientId}`)) {
+                    const cvcSide = getValue(`cvc_side_${patientId}`);
+                    const cvcLocal = getValue(`cvc_local_${patientId}`);
+                    dispositivos.push(`CVC${cvcSide ? ` (${cvcSide})` : ''}${cvcLocal ? ` - ${cvcLocal}` : ''}`);
+                }
+                if (getValue(`avp_${patientId}`)) {
+                    const avpSide = getValue(`avp_side_${patientId}`);
+                    const avpLocal = getValue(`avp_local_${patientId}`);
+                    dispositivos.push(`AVP${avpSide ? ` (${avpSide})` : ''}${avpLocal ? ` - ${avpLocal}` : ''}`);
+                }
+                if (getValue(`linha_arterial_${patientId}`)) {
+                    const laSide = getValue(`linha_arterial_side_${patientId}`);
+                    const laLocal = getValue(`linha_arterial_local_${patientId}`);
+                    dispositivos.push(`Linha Arterial (PAM)${laSide ? ` (${laSide})` : ''}${laLocal ? ` - ${laLocal}` : ''}`);
+                }
                 if (getValue(`svd_${patientId}`)) dispositivos.push('SVD');
                 if (getValue(`tot_${patientId}`)) dispositivos.push('TOT/Traq');
                 if (getValue(`sng_${patientId}`)) dispositivos.push('SNG/SNE');
-                if (getValue(`linha_arterial_${patientId}`)) dispositivos.push('Linha Arterial (PAM)');
                 
                 const drenos = getValue(`drenos_${patientId}`);
                 if (drenos) dispositivos.push(`Drenos: ${drenos}`);
@@ -1117,6 +1339,12 @@
                     report += `🔧 DISPOSITIVOS EM USO:\n`;
                     dispositivos.forEach(disp => report += `• ${disp}\n`);
                     report += `\n`;
+                }
+
+                const sofaResult = document.getElementById(`sofaResult_${patientId}`)?.innerText || '';
+                if (sofaResult) {
+                    report += `📊 SCORE SOFA:\n`;
+                    report += `${sofaResult}\n\n`;
                 }
                 
                 // Observações
@@ -1162,6 +1390,7 @@
                 patients: [],
                 patientCounter: patientCounter,
                 dvaCounters: dvaCounters,
+                antibioticoCounters: antibioticoCounters,
                 darkMode: document.body.classList.contains('dark-mode')
             };
             
@@ -1191,6 +1420,7 @@
                 document.getElementById('reportDate').value = data.reportDate;
                 patientCounter = data.patientCounter || 0;
                 dvaCounters = data.dvaCounters || {};
+                antibioticoCounters = data.antibioticoCounters || {};
                 
                 data.patients.forEach(patient => {
                     // Criar o cartão do paciente antes de manipular os campos
@@ -1201,7 +1431,7 @@
                     
                     // Restaurar os dados básicos do paciente
                     Object.keys(patient.data).forEach(key => {
-                        if (!key.startsWith('dva_nome_') && !key.startsWith('dva_dose_')) {
+                        if (!key.startsWith('dva_nome_') && !key.startsWith('dva_dose_') && !key.startsWith('antibiotico_nome_') && !key.startsWith('antibiotico_dia_')) {
                             const elem = document.getElementById(key);
                             if (elem) {
                                 if (elem.type === 'checkbox') {
@@ -1242,10 +1472,42 @@
                         dvaCounters[patientId] = maxDvaIndex;
                     }
                     
+                    // Restaurar Antibióticos
+                    const antibioticoContainer = document.getElementById(`antibiotico_container_${patientId}`);
+                    if (antibioticoContainer) {
+                        antibioticoContainer.innerHTML = `
+                            <div class="form-row antibiotico-row" data-antibiotico-id="0">
+                                <input type="text" id="antibiotico_nome_0_${patientId}" placeholder="Nome do antibiótico" oninput="saveData();" value="${patient.data[`antibiotico_nome_0_${patientId}`] || ''}">
+                                <input type="text" id="antibiotico_dia_0_${patientId}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();" value="${patient.data[`antibiotico_dia_0_${patientId}`] || ''}">
+                                <button class="btn remove-antibiotico-btn" style="display: none;" onclick="removeAntibiotico(${patientId}, 0)">🗑️</button>
+                            </div>
+                        `;
+                        
+                        let maxIndex = 0;
+                        Object.keys(patient.data).forEach(key => {
+                            if (key.startsWith('antibiotico_nome_') && !key.startsWith('antibiotico_nome_0_')) {
+                                const index = parseInt(key.split('_')[2]);
+                                maxIndex = Math.max(maxIndex, index);
+                                const html = `
+                                    <div class="form-row antibiotico-row" data-antibiotico-id="${index}">
+                                        <input type="text" id="antibiotico_nome_${index}_${patientId}" placeholder="Nome do antibiótico" oninput="saveData();" value="${patient.data[`antibiotico_nome_${index}_${patientId}`] || ''}">
+                                        <input type="text" id="antibiotico_dia_${index}_${patientId}" placeholder="Dia de uso (ex: d1, d2)" oninput="saveData();" value="${patient.data[`antibiotico_dia_${index}_${patientId}`] || ''}">
+                                        <button class="btn remove-antibiotico-btn" onclick="removeAntibiotico(${patientId}, ${index})">🗑️</button>
+                                    </div>
+                                `;
+                                antibioticoContainer.insertAdjacentHTML('beforeend', html);
+                            }
+                        });
+                        antibioticoCounters[patientId] = maxIndex;
+                    }
+                    
                     // Atualizar cálculos e controles
                     calculateBalance(patientId);
                     calculateDeltaHGT(patientId);
                     togglePaControls(patientId);
+                    toggleDeviceDetails('cvc', patientId);
+                    toggleDeviceDetails('avp', patientId);
+                    toggleDeviceDetails('linha_arterial', patientId);
                 });
                 
                 if (data.darkMode) {
@@ -1287,7 +1549,6 @@
             });
             document.getElementById('ckdResult').innerText = '';
             document.getElementById('infusionResult').innerText = '';
-            document.getElementById('sofaResult').innerText = '';
             document.getElementById('gcsResult').innerText = '';
             document.getElementById('apacheResult').innerText = '';
         }
@@ -1297,29 +1558,7 @@
                 <h2>Calculadoras Médicas</h2>
                 <button class="btn btn-reset" onclick="resetCalculadoras()">🗑️ Zerar Calculadoras</button>
 
-                <details>
-                    <summary>TFG CKD-EPI</summary>
-                    <div class="calc-content">
-                        <div class="form-group">
-                            <label>Idade:</label>
-                            <input type="text" id="age" placeholder="anos" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Sexo:</label>
-                            <select id="sex"><option value="male">Masculino</option><option value="female">Feminino</option></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Creatinina:</label>
-                            <input type="text" id="creat" placeholder="mg/dL" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Raça:</label>
-                            <select id="race"><option value="nonblack">Não negro</option><option value="black">Negro</option></select>
-                        </div>
-                        <button type="button" class="btn" onclick="calcCKD()">Calcular</button>
-                        <p id="ckdResult"></p>
-                    </div>
-                </details>
+                <button class="btn" onclick="window.open('https://sbn.org.br/medicos/utilidades/calculadoras-nefrologicas/ckd-epi-2021/', '_blank')">🧮 Calculadora TFG CKD-EPI 2021</button>
 
                 <details>
                     <summary>Conversor Infusão (ml/h ↔ mcg/kg/min)</summary>
@@ -1348,39 +1587,6 @@
                         <p id="infusionResult"></p>
                     </div>
                 </details>
-
-                <details>
-                    <summary>Score SOFA</summary>
-                    <div class="calc-content">
-                        <div class="form-group">
-                            <label>Respiração (PaO2/FiO2):</label>
-                            <input type="text" id="resp" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Plaquetas (x10^3/µL):</label>
-                            <input type="text" id="plat" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Bilirrubina (mg/dL):</label>
-                            <input type="text" id="bili" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Cardiovascular (MAP ou Vasoativos):</label>
-                            <input type="text" id="cv" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Glasgow (SNC):</label>
-                            <input type="text" id="gcs" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <div class="form-group">
-                            <label>Creatinina (mg/dL) ou Diurese (mL/dia):</label>
-                            <input type="text" id="renal" oninput="validateInput(this, 'decimal');">
-                        </div>
-                        <button type="button" class="btn" onclick="calcSOFA()">Calcular</button>
-                        <p id="sofaResult"></p>
-                    </div>
-                </details>
-
                 <details>
                     <summary>Glasgow Coma Scale (GCS)</summary>
                     <div class="calc-content">
@@ -1432,30 +1638,6 @@
             document.getElementById('calculadoras').innerHTML = calcHtml;
         }
         
-        function calcCKD() {
-            let age = parseFloat(document.getElementById('age').value.replace(',', '.'));
-            let creat = parseFloat(document.getElementById('creat').value.replace(',', '.'));
-            let sex = document.getElementById('sex').value;
-            let race = document.getElementById('race').value;
-            
-            if (isNaN(age) || isNaN(creat) || age <= 0 || creat <= 0) {
-                document.getElementById('ckdResult').innerText = 'Preencha idade e creatinina com valores válidos.';
-                return;
-            }
-            
-            // CKD-EPI formula: eGFR = 141 * min(Scr/κ, 1)^α * max(Scr/κ, 1)^-1.209 * 0.993^Age * sex_factor * race_factor
-            let kappa = sex === 'female' ? 0.7 : 0.9;
-            let alpha = sex === 'female' ? -0.329 : -0.411;
-            let sex_factor = sex === 'female' ? 1.018 : 1;
-            let race_factor = race === 'black' ? 1.159 : 1;
-            
-            let min_term = Math.min(creat / kappa, 1);
-            let max_term = Math.max(creat / kappa, 1);
-            let gfr = 141 * Math.pow(min_term, alpha) * Math.pow(max_term, -1.209) * Math.pow(0.993, age) * sex_factor * race_factor;
-            
-            document.getElementById('ckdResult').innerText = `eGFR: ${gfr.toFixed(2)} mL/min/1.73m²`;
-        }
-        
         function calcInfusion() {
             let mode = document.getElementById('mode').value;
             let weight = parseFloat(document.getElementById('weight').value.replace(',', '.'));
@@ -1485,16 +1667,28 @@
             }
         }
         
-        function calcSOFA() {
-            let resp = parseFloat(document.getElementById('resp').value.replace(',', '.'));
-            let plat = parseFloat(document.getElementById('plat').value.replace(',', '.'));
-            let bili = parseFloat(document.getElementById('bili').value.replace(',', '.'));
-            let cv = parseFloat(document.getElementById('cv').value.replace(',', '.'));
-            let gcs = parseFloat(document.getElementById('gcs').value.replace(',', '.'));
-            let renal = parseFloat(document.getElementById('renal').value.replace(',', '.'));
+        function calcGCS() {
+            let eyes = parseInt(document.getElementById('eyes').value);
+            let verbal = parseInt(document.getElementById('verbal').value);
+            let motor = parseInt(document.getElementById('motor').value);
+            if (isNaN(eyes) || isNaN(verbal) || isNaN(motor)) {
+                document.getElementById('gcsResult').innerText = 'Selecione todas as opções.';
+                return;
+            }
+            let total = eyes + verbal + motor;
+            document.getElementById('gcsResult').innerText = `GCS Total: ${total}`;
+        }
+        
+        function calcSOFA(patientId) {
+            let resp = parseFloat(getValue(`sofa_resp_${patientId}`).replace(',', '.'));
+            let plat = parseFloat(getValue(`sofa_plat_${patientId}`).replace(',', '.'));
+            let bili = parseFloat(getValue(`sofa_bili_${patientId}`).replace(',', '.'));
+            let cv = parseFloat(getValue(`sofa_cv_${patientId}`).replace(',', '.'));
+            let gcs = parseFloat(getValue(`sofa_gcs_${patientId}`).replace(',', '.'));
+            let renal = parseFloat(getValue(`sofa_renal_${patientId}`).replace(',', '.'));
             
             if (isNaN(resp) || isNaN(plat) || isNaN(bili) || isNaN(cv) || isNaN(gcs) || isNaN(renal)) {
-                document.getElementById('sofaResult').innerText = 'Preencha todos os campos com valores válidos.';
+                document.getElementById(`sofaResult_${patientId}`).innerText = 'Preencha todos os campos com valores válidos.';
                 return;
             }
             
@@ -1535,19 +1729,7 @@
             else if (renal >= 1.2) scoreRenal = 1;
             
             let total = scoreResp + scorePlat + scoreBili + scoreCv + scoreGcs + scoreRenal;
-            document.getElementById('sofaResult').innerText = `SOFA Total: ${total}`;
-        }
-        
-        function calcGCS() {
-            let eyes = parseInt(document.getElementById('eyes').value);
-            let verbal = parseInt(document.getElementById('verbal').value);
-            let motor = parseInt(document.getElementById('motor').value);
-            if (isNaN(eyes) || isNaN(verbal) || isNaN(motor)) {
-                document.getElementById('gcsResult').innerText = 'Selecione todas as opções.';
-                return;
-            }
-            let total = eyes + verbal + motor;
-            document.getElementById('gcsResult').innerText = `GCS Total: ${total}`;
+            document.getElementById(`sofaResult_${patientId}`).innerText = `SOFA Total: ${total} (Resp: ${scoreResp}, Plat: ${scorePlat}, Bili: ${scoreBili}, CV: ${scoreCv}, GCS: ${scoreGcs}, Renal: ${scoreRenal})`;
         }
         
         function calcApache() {
